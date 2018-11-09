@@ -97,7 +97,7 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
     string public symbol;
     string public  name;
     uint8 public decimals;
-    uint public _totalSupply = 3000000;
+    uint public _totalSupply;
     uint public startDate = now;
     uint public endDate;
 
@@ -114,11 +114,9 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
     uint public tranche_5_cap;
     uint public tranche_6;
     uint public tranche_6_cap;
+    uint public _maxSupply;
 
-    // Token Distribution
-    // ------------------------------------------------------------------------
-    uint256 public tokensForTeam = 600000 ;
-    // ------------------------------------------------------------------------
+    uint256 public tokensForTeam;
 
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
@@ -133,17 +131,24 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
 
         decimals = 18;
 
+        // Token Distribution
+        // ------------------------------------------------------------------------
+        tokensForTeam = 600000;
+        _maxSupply = 3000000;
+        // ------------------------------------------------------------------------
+
+        _maxSupply = safeMul(_maxSupply, safePower(10, decimals));
         tokensForTeam = safeMul(tokensForTeam, safePower(10, decimals));
         balances[msg.sender] = safeAdd(balances[msg.sender], tokensForTeam);
         _totalSupply = safeAdd(_totalSupply, tokensForTeam);
         Transfer(address(0), msg.sender, tokensForTeam);
 
-        tranche_1_cap = 50000;
-        tranche_2_cap = 150000;
-        tranche_3_cap = 350000;
-        tranche_4_cap = 550000;
-        tranche_5_cap = 900000;
-        tranche_6_cap = 1000000;
+        tranche_1_cap = safeMul(50000, safePower(10, decimals));
+        tranche_2_cap = safeMul(150000, safePower(10, decimals));
+        tranche_3_cap = safeMul(350000, safePower(10, decimals));
+        tranche_4_cap = safeMul(550000, safePower(10, decimals));
+        tranche_5_cap = safeMul(900000, safePower(10, decimals));
+        tranche_6_cap = safeMul(1000000, safePower(10, decimals));
         tranche_1 = now + 24 hours;
         tranche_2 = tranche_1 + 48 hours;
         tranche_3 = tranche_2 + 48 hours;
@@ -228,19 +233,21 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
         require (msg.value > 0);
         require(now >= startDate && now <= endDate);
         uint tokens;
-        if ((now <= endDate) && (_totalSupply <= (_totalSupply - tokensForTeam))) {
-            if ((now <= tranche_1) && (_totalSupply <= tranche_1_cap)){
+        if (_totalSupply <= _maxSupply) {
+            if ((now <= tranche_1) && ((_totalSupply - tokensForTeam) <= tranche_1_cap)){
                 tokens = msg.value * 266;
-            } else if ((now <= tranche_2) && (_totalSupply <= tranche_1_cap + tranche_2_cap)) {
+            } else if ((now <= tranche_2) && ((_totalSupply - tokensForTeam) <= safeAdd(tranche_1_cap, tranche_2_cap))) {
                 tokens = msg.value * 250;
-            } else if ((now <= tranche_3) && (_totalSupply <= tranche_1_cap + tranche_2_cap  + tranche_3_cap)) {
+            } else if ((now <= tranche_3) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), tranche_3_cap))) {
                 tokens = msg.value * 235;
-            } else if ((now <= tranche_4) && (_totalSupply <= tranche_1_cap + tranche_2_cap  + tranche_3_cap + tranche_4_cap)) {
+            } else if ((now <= tranche_4) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), safeAdd(tranche_3_cap, tranche_4_cap)))) {
                 tokens = msg.value * 222;
-            } else if ((now <= tranche_5) && (_totalSupply <= tranche_1_cap + tranche_2_cap  + tranche_3_cap + tranche_4_cap + tranche_5_cap)) {
+            } else if ((now <= tranche_5) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), safeAdd(tranche_3_cap, tranche_4_cap)), tranche_5_cap))) {
                 tokens = msg.value * 210;
             } else if (now <= tranche_6) {
                 tokens = msg.value * 167;
+            } else {
+                tokens = msg.value * 100;
             }
             balances[msg.sender] = safeAdd(balances[msg.sender], tokens);
             _totalSupply = safeAdd(_totalSupply, tokens);
@@ -248,7 +255,6 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
             owner.transfer(msg.value);
         }
     }
-
 
 
     // ------------------------------------------------------------------------
