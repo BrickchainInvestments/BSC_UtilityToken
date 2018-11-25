@@ -235,19 +235,19 @@ contract BuildCoinUtilityToken is ERC20Interface, Owned, SafeMath {
         uint tokens;
         if (_totalSupply <= _maxSupply) {
             if ((now <= tranche_1) && ((_totalSupply - tokensForTeam) <= tranche_1_cap)){
-                tokens = msg.value * 266;
+                tokens = msg.value * 133;
             } else if ((now <= tranche_2) && ((_totalSupply - tokensForTeam) <= safeAdd(tranche_1_cap, tranche_2_cap))) {
-                tokens = msg.value * 250;
+                tokens = msg.value * 125;
             } else if ((now <= tranche_3) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), tranche_3_cap))) {
-                tokens = msg.value * 235;
+                tokens = msg.value * 118;
             } else if ((now <= tranche_4) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), safeAdd(tranche_3_cap, tranche_4_cap)))) {
-                tokens = msg.value * 222;
+                tokens = msg.value * 111;
             } else if ((now <= tranche_5) && ((_totalSupply - tokensForTeam) <= safeAdd(safeAdd(safeAdd(tranche_1_cap, tranche_2_cap), safeAdd(tranche_3_cap, tranche_4_cap)), tranche_5_cap))) {
-                tokens = msg.value * 210;
+                tokens = msg.value * 105;
             } else if (now <= tranche_6) {
-                tokens = msg.value * 167;
+                tokens = msg.value * 84;
             } else {
-                tokens = msg.value * 100;
+                tokens = msg.value * 50;
             }
             balances[msg.sender] = safeAdd(balances[msg.sender], tokens);
             _totalSupply = safeAdd(_totalSupply, tokens);
